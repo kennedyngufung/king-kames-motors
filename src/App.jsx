@@ -41,7 +41,7 @@ const MOCK_CARS = [
   { id: '1', name: 'Revuelto', price: 2600000, brand: 'Lamborghini', image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' },
   { id: '2', name: 'Purosangue', price: 1850000, brand: 'Ferrari', image: 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=800&q=80' },
   { id: '3', name: 'Spectre', price: 1950000, brand: 'Rolls-Royce', image: 'https://cdn.thespaces.com/wp-content/uploads/2022/10/Rolls-Royce-Spectre_HERO.jpeg' },
-  { id: '4', name: 'Chiron Super Sport', price: 14500000, brand: 'Bugatti', image: 'https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?auto=format&fit=crop&w=800&q=80' },
+  { id: '4', name: 'Chiron Super Sport', price: 14500000, brand: 'Bugatti', image: 'https://cdn.motor1.com/images/mgl/QE3q0/s1/2021-bugatti-chiron-super-sport-300.jpg' },
   { id: '5', name: '911 GT3 RS', price: 1150000, brand: 'Porsche', image: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80' }
 ];
 
@@ -160,6 +160,26 @@ export default function App() {
     await deleteDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'cart', docId));
   };
 
+const deleteOrder = async (orderId) => {
+  if (!orderId) return;
+
+  if (mockMode) {
+    setAdminOrders(prev => prev.filter(o => o.id !== orderId));
+    triggerStatus("Order Deleted (Local)");
+    return;
+  }
+
+  try {
+    await deleteDoc(
+      doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId)
+    );
+    triggerStatus("Order Deleted");
+  } catch (error) {
+    console.error("Delete failed:", error);
+    triggerStatus("Delete Failed");
+  }
+};
+
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     setIsSending(true);
@@ -253,7 +273,7 @@ export default function App() {
       )}
 
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-[60] px-8 py-6 flex justify-between items-center">
+      <nav className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-[60] px-4 md:px-8 py-4 md:py-6 flex justify-between items-center">
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('home')}>
           <div className="bg-slate-900 p-2.5 rounded-xl group-hover:rotate-[15deg] transition-transform duration-500"><Car className="text-white w-5 h-5" /></div>
           <span className="text-2xl font-black tracking-tighter uppercase italic">KING KAMES <span className="text-blue-600">MOTORS</span></span>
@@ -275,10 +295,10 @@ export default function App() {
 
       {/* Hero */}
       {view === 'home' && (
-        <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[70vh] md:h-[85vh] flex items-center justify-center overflow-hidden px-4">
           <img src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=2000&q=80" className="absolute inset-0 w-full h-full object-cover brightness-[0.4]" />
           <div className="relative z-10 text-center space-y-8 max-w-5xl px-6 animate-in slide-in-from-bottom-10 duration-700">
-            <h1 className="text-6xl md:text-[9rem] font-black text-white uppercase italic tracking-tighter leading-[0.85]">Elegance <span className="text-blue-500">Dubai.</span></h1>
+            <h1 className="text-4xl sm:text-6xl md:text-[9rem] font-black text-white uppercase italic tracking-tighter leading-[0.85]">Elegance <span className="text-blue-500">Dubai.</span></h1>
             <div className="flex gap-4 justify-center">
               <button onClick={() => setView('inventory')} className="bg-blue-600 text-white px-12 py-6 rounded-2xl font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20">Enter Showroom</button>
             </div>
@@ -288,7 +308,7 @@ export default function App() {
 
       {/* Inventory */}
       {view === 'inventory' && (
-        <section className="py-24 px-8 max-w-7xl mx-auto space-y-16 animate-in fade-in duration-500">
+        <section className="py-16 md:py-24 px-4 md:px-8 max-w-7xl mx-auto space-y-16 animate-in fade-in duration-500">
           <div className="flex justify-between items-end border-b border-slate-100 pb-12">
             <div>
               <p className="text-blue-600 font-black text-[11px] uppercase tracking-widest mb-2">Pinnacle Assets</p>
@@ -324,7 +344,7 @@ export default function App() {
 
       {/* Cart & Checkout */}
       {view === 'cart' && (
-        <section className="py-24 px-8 max-w-4xl mx-auto">
+        <section className="py-16 md:py-24 px-4 md:px-8 max-w-4xl mx-auto">
           <h2 className="text-6xl font-black italic uppercase tracking-tighter text-center mb-16">Stable</h2>
           <div className="bg-white rounded-[4rem] p-12 shadow-2xl border border-slate-50">
             {checkoutStep === 1 && (
@@ -354,7 +374,7 @@ export default function App() {
             {checkoutStep === 2 && (
               <form ref={identityFormRef} onSubmit={handleBookingSubmit} className="space-y-6 animate-in slide-in-from-right-10">
                 <input name="name" required placeholder="Full Name" className="w-full p-6 bg-slate-50 rounded-2xl outline-none font-bold" />
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <input name="email" type="email" required placeholder="Email" className="w-full p-6 bg-slate-50 rounded-2xl outline-none font-bold" />
                   <input name="phone" required placeholder="Phone Number" className="w-full p-6 bg-slate-50 rounded-2xl outline-none font-bold" />
                 </div>
@@ -380,7 +400,7 @@ export default function App() {
 
       {/* Admin Dashboard */}
       {view === 'admin' && (
-        <section className="py-24 px-8 max-w-7xl mx-auto space-y-20 animate-in fade-in">
+        <section className="py-16 md:py-24 px-4 md:px-8 max-w-7xl mx-auto space-y-20 animate-in fade-in">
           <div className="flex justify-between items-center border-b border-slate-100 pb-12">
             <div>
               <p className="text-blue-600 font-black text-[11px] uppercase tracking-widest">Registry Operations</p>
@@ -396,15 +416,31 @@ export default function App() {
                 <h3 className="text-3xl font-black italic uppercase tracking-tight">Active Bookings</h3>
               </div>
               <div className="space-y-6">
-                {adminOrders.length === 0 ? <p className="text-slate-300 font-black uppercase text-[10px]">No orders in registry</p> : adminOrders.map((order, i) => (
-                  <div key={i} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
+                {adminOrders.length === 0 ? <p className="text-slate-300 font-black uppercase text-[10px]">No orders in registry</p> : adminOrders.map((order) => (
+                  <div key={order.id} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="text-2xl font-black italic uppercase">{order.client?.name}</h4>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">{order.client?.email} • {order.client?.phone}</p>
-                      </div>
-                      <span className="bg-green-50 text-green-600 px-4 py-1.5 rounded-full text-[9px] font-black uppercase">Active</span>
-                    </div>
+  <div>
+    <h4 className="text-2xl font-black italic uppercase">
+      {order.client?.name}
+    </h4>
+    <p className="text-[10px] font-bold text-slate-400 uppercase">
+      {order.client?.email} • {order.client?.phone}
+    </p>
+  </div>
+
+  <div className="flex items-center gap-4">
+    <button
+      onClick={() => deleteOrder(order.id)}
+      className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition"
+    >
+      <Trash2 size={18} />
+    </button>
+
+    <span className="bg-green-50 text-green-600 px-4 py-1.5 rounded-full text-[9px] font-black uppercase">
+      Active
+    </span>
+  </div>
+</div>
                     <div className="bg-slate-50 p-6 rounded-2xl space-y-3">
                       {order.items?.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-[11px] font-black uppercase">
