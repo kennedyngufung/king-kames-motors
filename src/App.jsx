@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURATION ---
-const ADMIN_PASSKEY = "1234";
+const ADMIN_PASSKEY = "jFrrN512=+";
 const WHATSAPP_NUMBER = "971554910122"; 
 const MOCK_CARS = [
   { id: '1', name: 'Revuelto', price: 2600000, brand: 'Lamborghini', image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' },
